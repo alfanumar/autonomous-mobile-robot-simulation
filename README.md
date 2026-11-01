@@ -25,8 +25,9 @@ wheel speeds for a rectangular waypoint route.
 
 This repository demonstrates kinematics, feedback control, encoder
 quantization, Python software structure, CSV logging, automated tests, and
-result visualization. It does not claim physical robot, encoder, ROS2, or
-competition validation.
+result visualization. It also contains a separate ROS 2 Jazzy and Gazebo Sim
+integration that drives a modeled robot with odometry and a laser scanner.
+It does not claim physical robot, encoder hardware, or competition validation.
 
 ## Run the simulation
 
@@ -68,6 +69,48 @@ completion, and the difference between ground truth and odometry.
 The robot model is intentionally small and explainable. It does not model
 slip, motor dynamics, battery voltage, sensor noise, obstacles, or a physical
 encoder circuit.
+
+## ROS 2 and Gazebo Sim
+
+The ROS 2 package is in ros2_ws/src/mobile_robot_gazebo. It launches a custom
+differential-drive SDF model in Gazebo Sim 8, bridges Gazebo topics into ROS 2,
+and runs a waypoint controller that subscribes to /odom and /scan before
+publishing /cmd_vel.
+
+Requirements: ROS 2 Jazzy, Gazebo Sim 8, ros_gz_sim, ros_gz_bridge, RViz2,
+colcon, and Python rclpy packages.
+
+~~~bash
+source /opt/ros/jazzy/setup.bash
+cd ros2_ws
+colcon build --packages-select mobile_robot_gazebo
+source install/setup.bash
+ros2 launch mobile_robot_gazebo gazebo.launch.py
+~~~
+
+For a server-only run without the Gazebo GUI:
+
+~~~bash
+ros2 launch mobile_robot_gazebo gazebo.launch.py \
+  use_rviz:=false \
+  gz_args:="$(ros2 pkg prefix mobile_robot_gazebo)/share/mobile_robot_gazebo/worlds/mobile_robot_world.sdf -r -s"
+~~~
+
+Useful checks in another terminal:
+
+~~~bash
+source /opt/ros/jazzy/setup.bash
+source ros2_ws/install/setup.bash
+ros2 topic list
+ros2 topic echo /odom --once
+ros2 topic echo /scan --once
+ros2 topic echo /cmd_vel --once
+~~~
+
+The route is a square around a central obstacle. The controller uses odometry
+for waypoint feedback and monitors the laser scan for a simple close-obstacle
+stop-and-turn behavior. The ROS 2 and Gazebo result is documented in
+docs/GAZEBO_RESULTS.md.
 
 ## Portfolio evidence
 
