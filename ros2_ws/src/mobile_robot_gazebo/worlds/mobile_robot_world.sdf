@@ -85,6 +85,7 @@
             <noise><type>gaussian</type><mean>0.0</mean><stddev>0.01</stddev></noise>
           </lidar>
           <topic>scan</topic>
+          <gz_frame_id>base_link</gz_frame_id>
         </sensor>
       </link>
 
